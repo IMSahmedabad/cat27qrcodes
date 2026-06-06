@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAT '27 – QR Codes</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ims-blue:  #1a237e;
+  --ims-light: #e8eaf6;
+  --green:     #15803d;
+  --amber:     #d97706;
+  --border:    #d1d5db;
+  --text:      #111827;
+  --muted:     #6b7280;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f4f8;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+header {
+  width: 100%;
+  background: #fff;
+  border-bottom: 3px solid var(--ims-blue);
+  padding: 16px 20px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-wrap img {
+  height: 64px;
+  object-fit: contain;
+}
+
+.header-title {
+  color: var(--ims-blue);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.header-sub {
+  color: var(--muted);
+  font-size: 12.5px;
+  text-align: center;
+  margin-top: -4px;
+}
+
+.container {
+  width: 100%;
+  max-width: 440px;
+  padding: 24px 16px 48px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 26px 22px;
+  box-shadow: 0 2px 14px rgba(0,0,0,0.08);
+}
+
+.field { margin-bottom: 18px; }
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 7px;
+  letter-spacing: 0.2px;
+}
+
+select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  color: var(--text);
+  background: #fff;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+select:focus    { border-color: var(--ims-blue); }
+select:disabled { background-color: #f9fafb; color: var(--muted); cursor: not-allowed; }
+
+.btn-generate {
+  width: 100%;
+  padding: 14px;
+  background: var(--ims-blue);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+  letter-spacing: 0.3px;
+}
+.btn-generate:hover    { background: #283593; }
+.btn-generate:disabled { opacity: 0.4; cursor: not-allowed; }
+
+#result { display: none; margin-top: 22px; }
+
+.divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 0 0 20px;
+}
+
+.student-card {
+  background: var(--ims-light);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+.s-name { font-size: 20px; font-weight: 700; color: var(--ims-blue); margin-bottom: 5px; }
+.s-meta { font-size: 13px; color: #374151; line-height: 1.8; }
+.s-meta strong { color: var(--ims-blue); }
+.s-pin  { font-family: monospace; font-size: 12px; color: var(--muted); margin-top: 5px; }
+
+.qr-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 0 12px;
+}
+#qrcode {
+  padding: 14px;
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 14px;
+}
+#qrcode canvas { display: block; }
+
+.qr-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+  text-align: center;
+}
+
+.btn-download {
+  width: 100%;
+  margin-top: 14px;
+  padding: 13px;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-download:hover { background: #166534; }
+
+.notice {
+  margin-top: 20px;
+  padding: 12px 14px;
+  background: #fffbeb;
+  border-left: 3px solid var(--amber);
+  border-radius: 0 8px 8px 0;
+  font-size: 13px;
+  color: #78350f;
+  line-height: 1.65;
+}
+.notice strong { display: block; margin-bottom: 3px; }
+
+footer {
+  margin-top: 28px;
+  text-align: center;
+  font-size: 11.5px;
+  color: #9ca3af;
+  padding-bottom: 16px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <img src="data:image/webp;base64,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" alt="IMS">
+  </div>
+  <div class="header-title">CAT '27 &nbsp;·&nbsp; QR Codes</div>
+  <div class="header-sub">Select your batch and name to get your QR code</div>
+</header>
+
+<div class="container">
+  <div class="card">
+
+    <div class="field">
+      <label for="batchSelect">Select Batch</label>
+      <select id="batchSelect" onchange="onBatchChange()">
+        <option value="">— Choose your batch —</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="nameSelect">Select Your Name</label>
+      <select id="nameSelect" onchange="onNameChange()" disabled>
+        <option value="">— Choose your name —</option>
+      </select>
+    </div>
+
+    <button class="btn-generate" id="generateBtn" onclick="generateQR()" disabled>
+      Get My QR Code
+    </button>
+
+    <div id="result">
+      <hr class="divider" style="margin-top:22px;">
+
+      <div class="student-card">
+        <div class="s-name" id="sName"></div>
+        <div class="s-meta">Batch &nbsp;<strong id="sBatch"></strong></div>
+        <div class="s-pin"  id="sPin"></div>
+      </div>
+
+      <div class="qr-center">
+        <div id="qrcode"></div>
+        <div class="qr-hint">📲 Show this QR at the gate before entering</div>
+      </div>
+
+      <button class="btn-download" onclick="downloadQR()">⬇ Download QR Code</button>
+    </div>
+
+    <div class="notice">
+      <strong>📌 Important</strong>
+      Get your QR scanned at the gate before you enter — this is how your attendance is recorded. Download or screenshot your pass so it works offline.
+    </div>
+
+  </div>
+  <footer>IMS Ahmedabad &nbsp;·&nbsp; CAT 27</footer>
+</div>
+
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec";
+
+const BATCHES = {"CAT 2701": [{"pin": "STU0001216900", "name": "Aarav Makwana", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001186796", "name": "Bhoomi Agrawal", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001219283", "name": "Dhairya Patel", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001199529", "name": "Dhruneev Bhatti", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001212958", "name": "Dhruv Ratnavat", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001214855", "name": "Dhyey Patel", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001214922", "name": "Dikshant Lalani", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001192199", "name": "Divyam Jaiswal", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001186619", "name": "Drashti Mandaliya", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001211567", "name": "Hancy Shah", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001189638", "name": "Kangana Kuntal", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001206400", "name": "Kathan Doshi", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001212859", "name": "Khushal Jain", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001217378", "name": "Kuldeep Chavda", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001214170", "name": "Madhav Porwal", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001209779", "name": "Manav Gangdev", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001216736", "name": "Mannat Desai", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001198483", "name": "Margi Doriya", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001215430", "name": "Mayank Kajani", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001196934", "name": "Naman Choubisa", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001210889", "name": "Nami Shah", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001188684", "name": "Namya Vora", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001217481", "name": "Narendra Patel", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001185393", "name": "Netra Upadhyay", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001175017", "name": "Nil Patel", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001189639", "name": "Nishtha Prajapati", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001219027", "name": "Paramdev Soni", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001211013", "name": "Prince Chauhan", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001206273", "name": "Suhani Maheshwari", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001201011", "name": "Sujal Khatri", "slot": "1:30 PM – 3:30 PM"}, {"pin": "IMS0001134303", "name": "Tejas Bharakhda", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001215195", "name": "Twisha Roy", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001187915", "name": "Vansh Galani", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001217482", "name": "Vanshika Kamdar", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001192301", "name": "Vinayak Vegda", "slot": "1:30 PM – 3:30 PM"}], "CAT 2702": [{"pin": "STU0001202985", "name": "Aliraza Kapasi", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001230675", "name": "Arshiya Sareshwala", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001222225", "name": "Bhavin Raiyani", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001229167", "name": "Fazal Naqvi", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001209716", "name": "Harsh Pawar", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001218537", "name": "Harsh Thadani", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001195735", "name": "Het Malani", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001183882", "name": "Jeet Bhimani", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001212480", "name": "Juhi Bhatt", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001214019", "name": "Krishna Ramani", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001185783", "name": "Kwina Thakkar", "slot": "1:30 PM – 3:30 PM"}, {"pin": "IMS0001030011", "name": "Nayan Shah", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001211157", "name": "Nishant Bhojani", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001223138", "name": "Om Patel", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001222223", "name": "Priyanj Bhanderi", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001219487", "name": "Rashi Mirani", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001192525", "name": "Riya Parmar", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001210210", "name": "Satvi Savaliya", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001221625", "name": "Saumya Pandya", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001223136", "name": "Shaan Patel", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001217869", "name": "Vansh Hardev", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001220416", "name": "Vatsalya Singh", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001231191", "name": "Vedanshi Vyas", "slot": "1:30 PM – 3:30 PM"}], "CAT 2703": [{"pin": "STU0001220427", "name": "Abhishek Panchal", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001211280", "name": "Aniket Hadiya", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001220591", "name": "Atharv Kherodia", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001230777", "name": "Charmi Parekh", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001192461", "name": "Devarsh Patel", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001173822", "name": "Harsh Vadecha", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001231592", "name": "Henil Shah", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001225206", "name": "Himanshi Mirchandani", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001232215", "name": "Jagrut Thummar", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001199925", "name": "Jugal Patel", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001188403", "name": "Kalgi Prajapati", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001224304", "name": "Khushi Aghera", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001210940", "name": "Khushi Patel", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001220465", "name": "Kinjal Gandhi", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001190336", "name": "Kunj Patel", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001217279", "name": "Milind Nagpara", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001227129", "name": "Omi Lathiya", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001227528", "name": "Parth Parmar", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001231341", "name": "Prachi Dhulera", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001227415", "name": "Prutha Patel", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001230083", "name": "Purva Dhrangu", "slot": "1:30 PM – 3:30 PM"}, {"pin": "IMS0001137946", "name": "Purva Patel", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001220414", "name": "Raina Desai", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001233513", "name": "Rena Vaghasiya", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001206550", "name": "Riya Shah", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001215156", "name": "Roshan Batheja", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001220088", "name": "Sandeep Modhvadiya", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001186595", "name": "Saumya Patel", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001196677", "name": "Shubham Singh", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001229642", "name": "Smit Thakkar", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001223017", "name": "Vallabh Maheshwari", "slot": "1:30 PM – 3:30 PM"}, {"pin": "STU0001211282", "name": "Vandan Kakadiya", "slot": "1:30 PM – 3:30 PM"}], "CAT 2704": [{"pin": "STU0001248913", "name": "Aryan Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001240128", "name": "Dev Sharma", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001243379", "name": "Dhruv Kacha", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001255112", "name": "Dhruv Motwani", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001233119", "name": "Durvish Chawla", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001175434", "name": "Fenil Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001235510", "name": "Harshika Lakhwani", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001238307", "name": "Heriom Jadeja", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001244071", "name": "Madhav Aggarwal", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001197044", "name": "Manav Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001233415", "name": "Margi Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001226011", "name": "Meet Shah", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001212225", "name": "Nikunj Sharma", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001239572", "name": "Nirjara Mistri", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001235880", "name": "Niyati Lalwani", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001245409", "name": "Preya Chaudhary", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001248914", "name": "Prince Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001244471", "name": "Prutha Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "IMS0001146575", "name": "Renish Goijiya", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001239226", "name": "Shubham Karia", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001237846", "name": "Shubham Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001245257", "name": "Smit Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001231270", "name": "Sneha Purohit", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001242340", "name": "Srushti Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001251106", "name": "Tarun Prajapati", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001237628", "name": "Urvi Sadrani", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001237529", "name": "Ved Shukla", "slot": "3:45 PM – 5:45 PM"}], "CAT 2705": [{"pin": "STU0001247863", "name": "Aastha Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001218361", "name": "Aditya Sonawane", "slot": "3:45 PM – 5:45 PM"}, {"pin": "IMS0001148819", "name": "Anushka Pillai", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001196123", "name": "Aum Chag", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001218106", "name": "Bhavik Limbachiya", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001183538", "name": "Bhavya Vadecha", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001242310", "name": "Daksh Mulsha", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001235053", "name": "Devanshi Marfatiya", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001193126", "name": "Dhruv Shah", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001235613", "name": "Dhruv Shah N", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001232214", "name": "Dhruv Solanki", "slot": "3:45 PM – 5:45 PM"}, {"pin": "IMS0001109925", "name": "Dhruvi Thanki", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001246659", "name": "Diya Detroja", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001250462", "name": "Gopal Donda", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001243639", "name": "Haril Jain", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001244377", "name": "Harsh Kumhar", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001240857", "name": "Harshit Jain", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001232213", "name": "Kartavya Solanki", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001173901", "name": "Kavya Parikh", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001242598", "name": "Kevin Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001235746", "name": "Khushi Bhoraniya", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001199842", "name": "Khushi Trivedi", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001246646", "name": "Mahi Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001244083", "name": "Mann Chandarana", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001237954", "name": "Mayank Vaghela", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001246291", "name": "Meet Prajapati", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001251033", "name": "Pallav Bhura", "slot": "3:45 PM – 5:45 PM"}, {"pin": "IMS0001152927", "name": "Priyanshi Dave", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001242312", "name": "Raj Ranpariya", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001242311", "name": "Rutvik Radadiya", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001190156", "name": "Safwan Vahora", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001242990", "name": "Satyam Pathak", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001237176", "name": "Vandan Surani", "slot": "3:45 PM – 5:45 PM"}], "CAT 2706": [{"pin": "STU0001226320", "name": "Anmol Mishra", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001224643", "name": "Devansh Agrawal", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001244109", "name": "Devanshi Padariya", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001257394", "name": "Dhruvesh Tanna", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001247174", "name": "Harsh Soni", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001235308", "name": "Jhanvi Shah", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001231078", "name": "Jiya Barot", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001247175", "name": "Kalp Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001233355", "name": "Khushi Marathe", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001190011", "name": "Kush Singh", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001243953", "name": "Madhvi Vekariya", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001247163", "name": "Manav Shah", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001250750", "name": "Mokshaa Shah", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001238527", "name": "Nidhi Katariya", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001227835", "name": "Pal Karia", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001166029", "name": "Pal Maheshwari", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001178786", "name": "Paras Prajapat", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001227273", "name": "Parth Srivastava", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001240276", "name": "Prasanna Satikuvar", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001226828", "name": "Prithvi Kalariya", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001244110", "name": "Sangini Bhalodi", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001246051", "name": "Shivam Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "IMS0001118670", "name": "Tanish Sharma", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001211383", "name": "Utsav Kotecha", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001256602", "name": "Vaishali Gidwani", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001234826", "name": "Vihaan Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001249492", "name": "Yash Patel", "slot": "3:45 PM – 5:45 PM"}], "CAT 2707": [{"pin": "IMS0001107884", "name": "Aastha Vardiwale", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001246550", "name": "Aditya Lalwani", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001253566", "name": "Anushri Paliwal", "slot": "3:45 PM – 5:45 PM"}, {"pin": "IMS0001088075", "name": "Archik Mehta", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001242863", "name": "Arman Pinjara", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001237262", "name": "Bhavika Vadher", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001246579", "name": "Dax Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001236117", "name": "Dhruv Jain", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001238779", "name": "Helly Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001234602", "name": "Jaival Chachcha", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001237393", "name": "Jaival Oza", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001248811", "name": "Kavya Bhatt", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001243394", "name": "Khushi Sharma", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001240352", "name": "Lekha Panchal", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001246280", "name": "Manav Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001232272", "name": "Netra Chavda", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001217647", "name": "Nirvairsingh Khera", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001246902", "name": "Nisarg Patel", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001248214", "name": "Palak Satasiya", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001194377", "name": "Srishti Gupta", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001248204", "name": "Tirth Makwana", "slot": "3:45 PM – 5:45 PM"}, {"pin": "STU0001232502", "name": "Ved Bhatt", "slot": "3:45 PM – 5:45 PM"}]};
+
+const batchSel = document.getElementById("batchSelect");
+const nameSel  = document.getElementById("nameSelect");
+const genBtn   = document.getElementById("generateBtn");
+
+Object.keys(BATCHES).sort().forEach(b => {
+  const opt = document.createElement("option");
+  opt.value = b;
+  opt.textContent = b;
+  batchSel.appendChild(opt);
+});
+
+function onBatchChange() {
+  const batch = batchSel.value;
+  nameSel.innerHTML = '<option value="">— Choose your name —</option>';
+  nameSel.disabled = !batch;
+  genBtn.disabled  = true;
+  document.getElementById("result").style.display = "none";
+  if (!batch) return;
+  BATCHES[batch].forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.pin;
+    opt.textContent = s.name;
+    nameSel.appendChild(opt);
+  });
+  nameSel.disabled = false;
+}
+
+function onNameChange() {
+  genBtn.disabled = !nameSel.value;
+  document.getElementById("result").style.display = "none";
+}
+
+let currentStudent = null;
+
+function generateQR() {
+  const batch = batchSel.value;
+  const pin   = nameSel.value;
+  if (!batch || !pin) return;
+
+  const student = BATCHES[batch].find(s => s.pin === pin);
+  if (!student) return;
+  currentStudent = { ...student, batch };
+
+  document.getElementById("sName").textContent  = student.name;
+  document.getElementById("sBatch").textContent = batch;
+  document.getElementById("sPin").textContent   = "PIN: " + student.pin;
+
+  const url = `${APPS_SCRIPT_URL}?pin=${encodeURIComponent(pin)}&event=CAT27`;
+
+  const qrEl = document.getElementById("qrcode");
+  qrEl.innerHTML = "";
+  new QRCode(qrEl, {
+    text: url,
+    width: 220, height: 220,
+    colorDark:  "#1a237e",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  document.getElementById("result").style.display = "block";
+  document.getElementById("result").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function downloadQR() {
+  setTimeout(() => {
+    const canvas = document.querySelector("#qrcode canvas");
+    if (!canvas) { alert("QR not ready, please wait a moment."); return; }
+
+    const pad = 20, infoH = 64;
+    const out = document.createElement("canvas");
+    out.width  = canvas.width  + pad * 2;
+    out.height = canvas.height + pad * 2 + infoH;
+    const ctx = out.getContext("2d");
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, out.width, out.height);
+
+    ctx.fillStyle = "#1a237e";
+    ctx.fillRect(0, 0, out.width, 7);
+
+    ctx.drawImage(canvas, pad, 14);
+
+    const cx = out.width / 2;
+    const ty = canvas.height + 14 + pad;
+
+    ctx.fillStyle = "#1a237e";
+    ctx.font = "bold 16px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(currentStudent.name, cx, ty + 18);
+
+    ctx.fillStyle = "#374151";
+    ctx.font = "13px Arial";
+    ctx.fillText(currentStudent.batch, cx, ty + 38);
+
+    ctx.fillStyle = "#9ca3af";
+    ctx.font = "11px Arial";
+    ctx.fillText("IMS Ahmedabad  ·  CAT 27", cx, ty + 56);
+
+    ctx.fillStyle = "#1a237e";
+    ctx.fillRect(0, out.height - 6, out.width, 6);
+
+    const link = document.createElement("a");
+    link.download = `IMS_QR_${currentStudent.pin}.png`;
+    link.href = out.toDataURL("image/png");
+    link.click();
+  }, 350);
+}
+</script>
+
+</body>
+</html>
